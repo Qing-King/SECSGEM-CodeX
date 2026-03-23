@@ -8,7 +8,13 @@ import DevicePanel from "./components/DevicePanel.vue";
 import MessageDetailDrawer from "./components/MessageDetailDrawer.vue";
 import MessageTable from "./components/MessageTable.vue";
 import { alarmList, deviceList as defaultDevices, runtimeMetrics } from "./mock-data";
-import { fetchDevices, fetchRecentMessages } from "./services/api";
+import {
+  connectDevice,
+  disconnectDevice,
+  fetchDevices,
+  fetchRecentMessages,
+  linktestDevice
+} from "./services/api";
 import { MockWsClient } from "./services/ws";
 import type { AlarmItem, DeviceSummary, MessageEvent } from "./types";
 
@@ -23,6 +29,13 @@ const activeDevice = computed(() =>
   devices.value.find((device) => device.id === activeDeviceId.value) ?? null
 );
 
+async function loadDevices(): Promise<void> {
+  devices.value = await fetchDevices();
+  if (!devices.value.some((device) => device.id === activeDeviceId.value) && devices.value.length > 0) {
+    activeDeviceId.value = devices.value[0].id;
+  }
+}
+
 async function loadMessages(): Promise<void> {
   messages.value = await fetchRecentMessages(activeDeviceId.value);
 }
@@ -36,15 +49,29 @@ function closeDrawer(): void {
   drawerVisible.value = false;
 }
 
-function notifyAction(action: string): void {
+async function runAction(action: "connect" | "disconnect" | "linktest"): Promise<void> {
+  if (!activeDevice.value) {
+    return;
+  }
+
+  const deviceId = activeDevice.value.id;
+  const result = action === "connect"
+    ? await connectDevice(deviceId)
+    : action === "disconnect"
+      ? await disconnectDevice(deviceId)
+      : await linktestDevice(deviceId);
+
   ElMessage({
-    message: `${action} command queued for ${activeDevice.value?.name ?? "device"}.`,
-    type: "success"
+    message: result.message,
+    type: result.ok ? "success" : "error"
   });
+
+  await loadDevices();
+  await loadMessages();
 }
 
 onMounted(async () => {
-  devices.value = await fetchDevices();
+  await loadDevices();
   await loadMessages();
 
   const ws = new MockWsClient((event) => {
@@ -77,8 +104,8 @@ onMounted(async () => {
         <p class="eyebrow">SECS/GEM Host Console</p>
         <h1>Realtime Equipment Console</h1>
         <p class="hero-copy">
-          This runtime page is separated from the design documents. It now includes connection controls,
-          active alarms, and a message detail drawer on top of the earlier dashboard shell.
+          The console now prefers live backend APIs. If the backend is unavailable, it falls back to mock data
+          so the page remains explorable during development.
         </p>
       </div>
       <div class="hero-stack">
@@ -98,9 +125,9 @@ onMounted(async () => {
 
     <ConnectionToolbar
       :active-device="activeDevice"
-      @connect="notifyAction('Connect')"
-      @disconnect="notifyAction('Disconnect')"
-      @linktest="notifyAction('Linktest')"
+      @connect="runAction('connect')"
+      @disconnect="runAction('disconnect')"
+      @linktest="runAction('linktest')"
       @refresh="loadMessages"
     />
 

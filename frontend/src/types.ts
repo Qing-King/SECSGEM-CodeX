@@ -36,6 +36,13 @@ export interface DeviceApiResponse {
   items: DeviceSummary[];
 }
 
+export interface ActionApiResponse {
+  ok: boolean;
+  action: string;
+  deviceId: string;
+  message: string;
+}
+
 export interface WsDeviceEvent {
   type: "session_state" | "secs_message" | "alarm" | "event";
   deviceId: string;

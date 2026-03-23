@@ -28,6 +28,22 @@ std::string build_messages_json(const std::string& device_id) {
     return oss.str();
 }
 
+std::string build_action_json(const std::string& device_id, const std::string& action) {
+    std::ostringstream oss;
+    oss << "{"
+        << "\"ok\":true,"
+        << "\"action\":\"" << action << "\","
+        << "\"deviceId\":\"" << device_id << "\","
+        << "\"message\":\"" << action << " accepted for " << device_id << "\""
+        << "}";
+    return oss.str();
+}
+
+std::string extract_method(const std::string& request) {
+    const auto first_space = request.find(' ');
+    return first_space == std::string::npos ? "GET" : request.substr(0, first_space);
+}
+
 std::string extract_path(const std::string& request) {
     const auto first_space = request.find(' ');
     if (first_space == std::string::npos) {
@@ -40,23 +56,42 @@ std::string extract_path(const std::string& request) {
     return request.substr(first_space + 1, second_space - first_space - 1);
 }
 
-std::string response_for_path(const std::string& path, int& status_code, std::string& status_text) {
-    if (path == "/api/devices") {
+std::string response_for_route(
+    const std::string& method,
+    const std::string& path,
+    int& status_code,
+    std::string& status_text) {
+    if (method == "GET" && path == "/api/devices") {
         status_code = 200;
         status_text = "OK";
         return build_devices_json();
     }
 
-    const std::string prefix = "/api/devices/";
-    const std::string suffix = "/messages";
-    if (path.rfind(prefix, 0) == 0 && path.size() > prefix.size() + suffix.size()) {
-        const auto suffix_pos = path.rfind(suffix);
-        if (suffix_pos != std::string::npos && suffix_pos + suffix.size() == path.size()) {
-            const auto device_id = path.substr(prefix.size(), suffix_pos - prefix.size());
+    const std::string device_prefix = "/api/devices/";
+    const std::string messages_suffix = "/messages";
+    if (path.rfind(device_prefix, 0) == 0) {
+        const auto rest = path.substr(device_prefix.size());
+        const auto slash_pos = rest.find('/');
+        const auto device_id = slash_pos == std::string::npos ? rest : rest.substr(0, slash_pos);
+        const auto action = slash_pos == std::string::npos ? "" : rest.substr(slash_pos + 1);
+
+        if (method == "GET" && action == "messages") {
             status_code = 200;
             status_text = "OK";
             return build_messages_json(device_id);
         }
+
+        if (method == "POST" && (action == "connect" || action == "disconnect" || action == "linktest")) {
+            status_code = 200;
+            status_text = "OK";
+            return build_action_json(device_id, action);
+        }
+    }
+
+    if (method == "OPTIONS") {
+        status_code = 204;
+        status_text = "No Content";
+        return "";
     }
 
     status_code = 404;
@@ -69,6 +104,8 @@ std::string build_http_response(const std::string& body, int status_code, const 
     oss << "HTTP/1.1 " << status_code << ' ' << status_text << "\r\n"
         << "Content-Type: application/json\r\n"
         << "Access-Control-Allow-Origin: *\r\n"
+        << "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
+        << "Access-Control-Allow-Headers: Content-Type, Accept\r\n"
         << "Content-Length: " << body.size() << "\r\n"
         << "Connection: close\r\n\r\n"
         << body;
@@ -118,10 +155,11 @@ void HttpServer::run(int port) {
       const auto bytes = ::read(client_fd, buffer, sizeof(buffer) - 1);
       if (bytes > 0) {
           const std::string request(buffer, static_cast<std::size_t>(bytes));
+          const auto method = extract_method(request);
           const auto path = extract_path(request);
           int status_code = 200;
           std::string status_text = "OK";
-          const auto body = response_for_path(path, status_code, status_text);
+          const auto body = response_for_route(method, path, status_code, status_text);
           const auto response = build_http_response(body, status_code, status_text);
           ::send(client_fd, response.c_str(), response.size(), 0);
       }
