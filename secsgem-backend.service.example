@@ -1,0 +1,14 @@
+[Unit]
+Description=SECSGEM Backend Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/secsgem-codex/backend/build
+ExecStart=/opt/secsgem-codex/backend/build/secsgem_backend
+Restart=always
+RestartSec=3
+User=ubuntu
+
+[Install]
+WantedBy=multi-user.target
