@@ -1,4 +1,4 @@
-﻿# Ubuntu Runbook
+# Ubuntu Runbook
 
 Set one variable first:
 
@@ -11,6 +11,13 @@ export APP_DIR=/opt/secsgem-codex
 ```bash
 sudo apt update
 sudo apt install -y git nginx nodejs npm cmake g++
+```
+
+If `nginx.service` is missing later, verify installation with:
+
+```bash
+systemctl list-unit-files | grep nginx
+which nginx
 ```
 
 ## 2. Clone the project
@@ -59,11 +66,26 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
+Important:
+
+- `proxy_pass` must be `http://127.0.0.1:8080`
+- do not add a trailing `/`
+- otherwise `/api/devices` may be rewritten to `/devices`
+
 ## 7. Run backend manually for first test
 
 ```bash
 cd $APP_DIR/backend/build
 ./secsgem_backend
+```
+
+## 7b. Optional systemd service
+
+```bash
+sudo cp $APP_DIR/secsgem-backend.service.example /etc/systemd/system/secsgem-backend.service
+sudo systemctl daemon-reload
+sudo systemctl enable secsgem-backend
+sudo systemctl start secsgem-backend
 ```
 
 ## 8. Verify from browser
@@ -92,4 +114,3 @@ Ubuntu:
 cd $APP_DIR
 ./deploy-ubuntu.sh
 ```
-

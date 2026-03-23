@@ -28,6 +28,14 @@ if systemctl list-unit-files | grep -q "^secsgem-backend.service"; then
   sudo systemctl restart secsgem-backend
 fi
 
-sudo systemctl restart nginx
+if systemctl list-unit-files | grep -q "^nginx.service"; then
+  sudo cp "$PROJECT_DIR/nginx-secsgem.conf.example" /etc/nginx/sites-available/secsgem
+  sudo ln -sf /etc/nginx/sites-available/secsgem /etc/nginx/sites-enabled/secsgem
+  sudo rm -f /etc/nginx/sites-enabled/default
+  sudo nginx -t
+  sudo systemctl restart nginx
+else
+  echo "Warning: nginx.service not found. Install and configure nginx before serving the web UI."
+fi
 
 echo "Deployment finished."
