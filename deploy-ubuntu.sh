@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="/opt/secsgem-codex"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${PROJECT_DIR:-$SCRIPT_DIR}"
 FRONTEND_DIR="$PROJECT_DIR/frontend"
 BACKEND_DIR="$PROJECT_DIR/backend"
-WEB_ROOT="/var/www/secsgem-console"
+WEB_ROOT="${WEB_ROOT:-/var/www/secsgem-console}"
 
 cd "$PROJECT_DIR"
 git pull
