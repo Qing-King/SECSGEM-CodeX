@@ -1,28 +1,47 @@
-export interface WsEnvelope {
-  type: string;
-  payload: unknown;
+import type { WsDeviceEvent } from "../types";
+
+export type WsHandler = (message: WsDeviceEvent) => void;
+
+function buildWebSocketUrl(deviceId: string): string {
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  return `${protocol}//${window.location.host}/ws/devices/${deviceId}`;
 }
 
-export type WsHandler = (message: WsEnvelope) => void;
-
-export class MockWsClient {
+export class DeviceWsClient {
+  private readonly deviceId: string;
   private readonly handler: WsHandler;
+  private socket: WebSocket | null = null;
 
-  constructor(handler: WsHandler) {
+  constructor(deviceId: string, handler: WsHandler) {
+    this.deviceId = deviceId;
     this.handler = handler;
   }
 
   connect(): void {
-    setTimeout(() => {
-      this.handler({
-        type: "secs_message",
-        payload: {
-          direction: "recv",
-          stream: 6,
-          function: 11,
-          note: "Mock event from WebSocket"
+    this.disconnect();
+
+    try {
+      this.socket = new WebSocket(buildWebSocketUrl(this.deviceId));
+      this.socket.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data) as WsDeviceEvent;
+          this.handler(payload);
+        } catch {
+          // Ignore malformed frames from the minimal backend.
         }
-      });
-    }, 1200);
+      };
+      this.socket.onerror = () => {
+        this.disconnect();
+      };
+    } catch {
+      this.disconnect();
+    }
+  }
+
+  disconnect(): void {
+    if (this.socket) {
+      this.socket.close();
+      this.socket = null;
+    }
   }
 }

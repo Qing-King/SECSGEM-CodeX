@@ -47,6 +47,10 @@ b9fe437 Fix nginx deployment and proxy config
   - `POST /api/devices/{id}/connect`
   - `POST /api/devices/{id}/disconnect`
   - `POST /api/devices/{id}/linktest`
+- Real WebSocket client:
+  - `GET /ws/devices/{id}` upgrade
+  - Reconnect on active-device switch
+  - Apply `session_state` and `secs_message` events to the runtime page
 
 ### Backend
 
@@ -59,6 +63,11 @@ b9fe437 Fix nginx deployment and proxy config
   - `POST /api/devices/{id}/connect`
   - `POST /api/devices/{id}/disconnect`
   - `POST /api/devices/{id}/linktest`
+  - `GET /ws/devices/{id}`
+- In-memory device state and message history:
+  - connect/disconnect updates device status
+  - linktest appends a live message event
+  - action results are broadcast over WebSocket
 
 ### Docs
 
@@ -76,13 +85,14 @@ b9fe437 Fix nginx deployment and proxy config
 - Ubuntu deployment script exists
 - Nginx config exists
 - Design docs are separated from runtime UI
+- Frontend now connects to a real backend WebSocket endpoint
+- Vite dev server proxies `/api` and `/ws` to `127.0.0.1:8080`
 
 ### Not Finished Yet
 
-- WebSocket is still mock on the frontend
-- Backend does not yet expose a real `/ws/devices/{id}` endpoint
 - No real `HSMS / SECS-II / GEM` protocol implementation yet
-- Backend is still a minimal HTTP skeleton, not a full framework server
+- Backend is still a minimal in-memory socket server, not a full framework server
+- WebSocket events are still synthesized from REST actions, not from a real equipment session
 
 ## Start Commands
 
@@ -124,6 +134,7 @@ sudo systemctl restart nginx
 - `/`
 - `/api/devices`
 - `/api/devices/eqp01/messages`
+- `/ws/devices/eqp01`
 
 ### Docs
 
@@ -134,11 +145,11 @@ sudo systemctl restart nginx
 
 ## Recommended Next Steps
 
-1. Replace `MockWsClient` with a real WebSocket client.
-2. Add backend `/ws/devices/{id}`.
-3. Add device state changes on connect/disconnect/linktest.
-4. Start implementing real `HSMS / SECS-II / GEM` session logic.
-5. Add real logging and message persistence.
+1. Replace synthetic WebSocket events with real `HSMS / SECS-II / GEM` session events.
+2. Add structured backend logging for REST and WebSocket activity.
+3. Add persistent message/alarm storage instead of in-memory vectors.
+4. Introduce a more complete server foundation if the backend needs routing/middleware growth.
+5. Add end-to-end verification in WSL/Ubuntu once Node and Linux build toolchains are available.
 
 ## Resume Checklist On A New Computer
 
@@ -147,5 +158,5 @@ sudo systemctl restart nginx
 3. Read this file and `README.md`.
 4. If using WSL, install `nvm` and use Node 20.
 5. Start backend and frontend with the commands above.
-6. Continue from WebSocket integration.
+6. Continue from real protocol integration and persistence.
 

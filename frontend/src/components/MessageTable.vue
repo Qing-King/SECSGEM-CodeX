@@ -14,7 +14,7 @@ const emit = defineEmits<{
   <section class="card card-wide">
     <div class="card-header">
       <h2>Recent Messages</h2>
-      <span>Mock + WebSocket</span>
+      <span>REST + WebSocket</span>
     </div>
     <el-table :data="messages" style="width: 100%" @row-click="emit('inspect', $event)">
       <el-table-column prop="timestamp" label="Time" width="120" />

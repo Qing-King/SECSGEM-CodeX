@@ -1,5 +1,5 @@
-﻿<script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import AlarmPanel from "./components/AlarmPanel.vue";
 import ArchitectureCard from "./components/ArchitectureCard.vue";
@@ -15,8 +15,8 @@ import {
   fetchRecentMessages,
   linktestDevice
 } from "./services/api";
-import { MockWsClient } from "./services/ws";
-import type { AlarmItem, DeviceSummary, MessageEvent } from "./types";
+import { DeviceWsClient } from "./services/ws";
+import type { AlarmItem, DeviceSummary, MessageEvent, WsDeviceEvent } from "./types";
 
 const devices = ref<DeviceSummary[]>(defaultDevices);
 const activeDeviceId = ref("eqp01");
@@ -24,6 +24,9 @@ const messages = ref<MessageEvent[]>([]);
 const alarms = ref<AlarmItem[]>(alarmList);
 const drawerVisible = ref(false);
 const selectedMessage = ref<MessageEvent | null>(null);
+const wsConnected = ref(false);
+
+let wsClient: DeviceWsClient | null = null;
 
 const activeDevice = computed(() =>
   devices.value.find((device) => device.id === activeDeviceId.value) ?? null
@@ -47,6 +50,75 @@ function openMessageDetail(message: MessageEvent): void {
 
 function closeDrawer(): void {
   drawerVisible.value = false;
+}
+
+function prependMessage(message: MessageEvent): void {
+  messages.value = [message, ...messages.value].slice(0, 12);
+}
+
+function upsertDeviceStatus(deviceId: string, status: DeviceSummary["status"]): void {
+  devices.value = devices.value.map((device) =>
+    device.id === deviceId ? { ...device, status } : device
+  );
+}
+
+function applyWsEvent(event: WsDeviceEvent): void {
+  wsConnected.value = true;
+
+  if (event.type === "session_state") {
+    const status = event.payload.status;
+    if (status === "connected" || status === "connecting" || status === "disconnected") {
+      upsertDeviceStatus(event.deviceId, status);
+    }
+
+    const payloadMessage = event.payload.message;
+    if (payloadMessage && typeof payloadMessage === "object") {
+      const rawMessage = payloadMessage as Record<string, unknown>;
+      if (
+        typeof rawMessage.id === "string" &&
+        typeof rawMessage.timestamp === "string" &&
+        typeof rawMessage.direction === "string" &&
+        typeof rawMessage.stream === "number" &&
+        typeof rawMessage.function === "number" &&
+        typeof rawMessage.note === "string"
+      ) {
+        prependMessage({
+          id: rawMessage.id,
+          timestamp: rawMessage.timestamp.slice(11, 19) || rawMessage.timestamp,
+          direction: rawMessage.direction === "send" ? "send" : "recv",
+          stream: rawMessage.stream,
+          function: rawMessage.function,
+          note: rawMessage.note
+        });
+      }
+    }
+    return;
+  }
+
+  if (event.type === "secs_message") {
+    prependMessage({
+      id: typeof event.payload.id === "string" ? event.payload.id : `ws-${Date.now()}`,
+      timestamp: typeof event.payload.timestamp === "string"
+        ? event.payload.timestamp.slice(11, 19) || event.payload.timestamp
+        : new Date().toLocaleTimeString("en-GB", { hour12: false }),
+      direction: event.payload.direction === "send" ? "send" : "recv",
+      stream: typeof event.payload.stream === "number" ? event.payload.stream : 0,
+      function: typeof event.payload.function === "number" ? event.payload.function : 0,
+      note: typeof event.payload.note === "string" ? event.payload.note : "Unknown"
+    });
+  }
+}
+
+function reconnectWs(): void {
+  wsClient?.disconnect();
+  wsConnected.value = false;
+
+  if (!activeDeviceId.value) {
+    return;
+  }
+
+  wsClient = new DeviceWsClient(activeDeviceId.value, applyWsEvent);
+  wsClient.connect();
 }
 
 async function runAction(action: "connect" | "disconnect" | "linktest"): Promise<void> {
@@ -73,27 +145,16 @@ async function runAction(action: "connect" | "disconnect" | "linktest"): Promise
 onMounted(async () => {
   await loadDevices();
   await loadMessages();
+  reconnectWs();
+});
 
-  const ws = new MockWsClient((event) => {
-    if (event.type !== "secs_message" || typeof event.payload !== "object" || event.payload === null) {
-      return;
-    }
+watch(activeDeviceId, async () => {
+  await loadMessages();
+  reconnectWs();
+});
 
-    const payload = event.payload as Record<string, unknown>;
-    messages.value = [
-      {
-        id: `ws-${Date.now()}`,
-        timestamp: new Date().toLocaleTimeString("en-GB", { hour12: false }),
-        direction: payload.direction === "send" ? "send" : "recv",
-        stream: typeof payload.stream === "number" ? payload.stream : 0,
-        function: typeof payload.function === "number" ? payload.function : 0,
-        note: typeof payload.note === "string" ? payload.note : "Unknown"
-      },
-      ...messages.value
-    ].slice(0, 12);
-  });
-
-  ws.connect();
+onBeforeUnmount(() => {
+  wsClient?.disconnect();
 });
 </script>
 
@@ -112,7 +173,7 @@ onMounted(async () => {
         <span>Vue 3</span>
         <span>Element Plus</span>
         <span>ECharts</span>
-        <span>WebSocket</span>
+        <span>{{ wsConnected ? "WS Live" : "WS Retry" }}</span>
       </div>
     </header>
 
@@ -135,7 +196,7 @@ onMounted(async () => {
       <DevicePanel
         :devices="devices"
         :active-device-id="activeDeviceId"
-        @select="activeDeviceId = $event; loadMessages()"
+        @select="activeDeviceId = $event"
       />
 
       <section class="card">
@@ -158,7 +219,7 @@ onMounted(async () => {
           </div>
           <div class="detail-item">
             <span>Session</span>
-            <strong>{{ activeDevice.selected ? "Selected" : activeDevice.status }}</strong>
+            <strong>{{ activeDevice.status }}</strong>
           </div>
         </div>
       </section>
@@ -175,4 +236,3 @@ onMounted(async () => {
     />
   </div>
 </template>
-

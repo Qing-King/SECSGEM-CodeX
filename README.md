@@ -96,10 +96,11 @@ http://YOUR_PUBLIC_IP/api/devices/eqp01/messages
 - `POST /api/devices/{id}/connect`
 - `POST /api/devices/{id}/disconnect`
 - `POST /api/devices/{id}/linktest`
+- `GET /ws/devices/{id}`
 
 ## 推荐推进顺序
 
 1. 先用 WSL 跑通前后端联调
 2. 再同步到 Ubuntu 云服务器
-3. 然后补 WebSocket 真推送
-4. 最后接入真实 `HSMS / SECS-II / GEM` 协议逻辑
+3. 然后把 WebSocket 推送对接到真实 `HSMS / SECS-II / GEM` 事件源
+4. 最后补完整会话管理、日志和持久化
