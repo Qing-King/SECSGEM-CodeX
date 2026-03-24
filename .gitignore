@@ -4,3 +4,4 @@ frontend/.vite/
 frontend/package-lock.json
 backend/build/
 *.log
+document/*.zip

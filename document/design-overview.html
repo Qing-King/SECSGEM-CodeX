@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SECS/GEM Host 设计文档</title>
+  <title>SECS/GEM Host è®¾è®¡æ–‡æ¡£</title>
   <style>
     :root {
       --panel: #fffaf2;
@@ -120,8 +120,8 @@
 <body>
   <div class="shell">
     <section class="hero">
-      <h1>SECS/GEM Host 设计文档</h1>
-      <p>这份文档用于说明网页端技术选型、系统架构、模块边界和最小落地路径。后续新增的 HTML 页面都会在这里增加入口，方便你通过浏览器直接跳转查看。</p>
+      <h1>SECS/GEM Host è®¾è®¡æ–‡æ¡£</h1>
+      <p>è¿™ä»½æ–‡æ¡£ç”¨äºŽè¯´æ˜Žç½‘é¡µç«¯æŠ€æœ¯é€‰åž‹ã€ç³»ç»Ÿæž¶æž„ã€æ¨¡å—è¾¹ç•Œå’Œæœ€å°è½åœ°è·¯å¾„ã€‚åŽç»­æ–°å¢žçš„ HTML é¡µé¢éƒ½ä¼šåœ¨è¿™é‡Œå¢žåŠ å…¥å£ï¼Œæ–¹ä¾¿ä½ é€šè¿‡æµè§ˆå™¨ç›´æŽ¥è·³è½¬æŸ¥çœ‹ã€‚</p>
       <div class="chips">
         <span class="chip">Vue 3</span>
         <span class="chip">Vite</span>
@@ -136,80 +136,84 @@
       <aside class="stack">
         <section class="panel">
           <div class="panel-header">
-            <h2>快速入口</h2>
+            <h2>å¿«é€Ÿå…¥å£</h2>
             <span class="tag">Links</span>
           </div>
           <div class="panel-body">
             <a class="link-card" href="/">
-              <strong>运行控制台</strong>
-              <div class="meta">SECS/GEM 实际网页界面，设备、报警、消息、连接控制都从这里进入。</div>
+              <strong>è¿è¡ŒæŽ§åˆ¶å°</strong>
+              <div class="meta">SECS/GEM å®žé™…ç½‘é¡µç•Œé¢ï¼Œè®¾å¤‡ã€æŠ¥è­¦ã€æ¶ˆæ¯ã€è¿žæŽ¥æŽ§åˆ¶éƒ½ä»Žè¿™é‡Œè¿›å…¥ã€‚</div>
               <span class="link-url">/</span>
             </a>
             <a class="link-card" href="/docs/todo-board.html">
-              <strong>Todo 看板</strong>
-              <div class="meta">当前开发任务、阶段进度和后续待办统一从这里查看。</div>
+              <strong>Todo çœ‹æ¿</strong>
+              <div class="meta">å½“å‰å¼€å‘ä»»åŠ¡ã€é˜¶æ®µè¿›åº¦å’ŒåŽç»­å¾…åŠžç»Ÿä¸€ä»Žè¿™é‡ŒæŸ¥çœ‹ã€‚</div>
               <span class="link-url">/docs/todo-board.html</span>
             </a>
             <a class="link-card" href="/docs/cloud-deploy.html">
-              <strong>云服务器部署说明</strong>
-              <div class="meta">适用于 Ubuntu 云服务器，包含 Nginx、systemd、持久化访问方式。</div>
+              <strong>äº‘æœåŠ¡å™¨éƒ¨ç½²è¯´æ˜Ž</strong>
+              <div class="meta">é€‚ç”¨äºŽ Ubuntu äº‘æœåŠ¡å™¨ï¼ŒåŒ…å« Nginxã€systemdã€æŒä¹…åŒ–è®¿é—®æ–¹å¼ã€‚</div>
               <span class="link-url">/docs/cloud-deploy.html</span>
             </a>
             <a class="link-card" href="/docs/wsl-dev.html">
-              <strong>WSL 本地开发说明</strong>
-              <div class="meta">适用于本机 WSL 开发调试，不需要长期驻留服务。</div>
+              <strong>WSL æœ¬åœ°å¼€å‘è¯´æ˜Ž</strong>
+              <div class="meta">é€‚ç”¨äºŽæœ¬æœº WSL å¼€å‘è°ƒè¯•ï¼Œä¸éœ€è¦é•¿æœŸé©»ç•™æœåŠ¡ã€‚</div>
               <span class="link-url">/docs/wsl-dev.html</span>
+            </a>            <a class="link-card" href="/docs/session-handoff.html">
+              <strong>Session Handoff</strong>
+              <div class="meta">当前工作交接包，包含分支、提交、命令、状态和下一步。</div>
+              <span class="link-url">/docs/session-handoff.html</span>
             </a>
             <a class="link-card" href="/api/devices" target="_blank" rel="noreferrer">
-              <strong>设备 API</strong>
-              <div class="meta">直接查看后端返回的设备列表 JSON，用于联调和验收。</div>
+              <strong>è®¾å¤‡ API</strong>
+              <div class="meta">ç›´æŽ¥æŸ¥çœ‹åŽç«¯è¿”å›žçš„è®¾å¤‡åˆ—è¡¨ JSONï¼Œç”¨äºŽè”è°ƒå’ŒéªŒæ”¶ã€‚</div>
               <span class="link-url">/api/devices</span>
             </a>
             <a class="link-card" href="/api/devices/eqp01/messages" target="_blank" rel="noreferrer">
-              <strong>消息 API</strong>
-              <div class="meta">直接查看指定设备的报文接口返回。</div>
+              <strong>æ¶ˆæ¯ API</strong>
+              <div class="meta">ç›´æŽ¥æŸ¥çœ‹æŒ‡å®šè®¾å¤‡çš„æŠ¥æ–‡æŽ¥å£è¿”å›žã€‚</div>
               <span class="link-url">/api/devices/eqp01/messages</span>
             </a>
           </div>
         </section>
         <section class="panel">
           <div class="panel-header">
-            <h2>模块目标</h2>
+            <h2>æ¨¡å—ç›®æ ‡</h2>
             <span class="tag">Document</span>
           </div>
           <div class="panel-body">
             <div class="device-card">
-              <h4>网页前端</h4>
-              <div class="meta">设备列表、连接状态、报文监控、报警事件、变量展示、手工操作界面。</div>
+              <h4>ç½‘é¡µå‰ç«¯</h4>
+              <div class="meta">è®¾å¤‡åˆ—è¡¨ã€è¿žæŽ¥çŠ¶æ€ã€æŠ¥æ–‡ç›‘æŽ§ã€æŠ¥è­¦äº‹ä»¶ã€å˜é‡å±•ç¤ºã€æ‰‹å·¥æ“ä½œç•Œé¢ã€‚</div>
             </div>
             <div class="device-card">
-              <h4>C++ 后端</h4>
-              <div class="meta">HSMS、SECS-II、GEM 逻辑、REST API、WebSocket 推送、日志存储。</div>
+              <h4>C++ åŽç«¯</h4>
+              <div class="meta">HSMSã€SECS-IIã€GEM é€»è¾‘ã€REST APIã€WebSocket æŽ¨é€ã€æ—¥å¿—å­˜å‚¨ã€‚</div>
             </div>
-            <div class="section-title">阶段拆分</div>
-            <div class="meta">1. 页面骨架与组件<br>2. API / WebSocket 客户端<br>3. C++ 服务接口<br>4. HostSession 协议实现</div>
+            <div class="section-title">é˜¶æ®µæ‹†åˆ†</div>
+            <div class="meta">1. é¡µé¢éª¨æž¶ä¸Žç»„ä»¶<br>2. API / WebSocket å®¢æˆ·ç«¯<br>3. C++ æœåŠ¡æŽ¥å£<br>4. HostSession åè®®å®žçŽ°</div>
           </div>
         </section>
       </aside>
       <main class="stack">
         <section class="panel">
           <div class="panel-header">
-            <h2>系统架构</h2>
-            <span class="meta">前端不处理协议二进制</span>
+            <h2>ç³»ç»Ÿæž¶æž„</h2>
+            <span class="meta">å‰ç«¯ä¸å¤„ç†åè®®äºŒè¿›åˆ¶</span>
           </div>
           <div class="panel-body">
             <div class="kpis">
-              <div class="kpi">API 风格<strong>REST</strong></div>
-              <div class="kpi">实时推送<strong>WS</strong></div>
-              <div class="kpi">协议核心<strong>HSMS</strong></div>
-              <div class="kpi">公网入口<strong>Nginx</strong></div>
+              <div class="kpi">API é£Žæ ¼<strong>REST</strong></div>
+              <div class="kpi">å®žæ—¶æŽ¨é€<strong>WS</strong></div>
+              <div class="kpi">åè®®æ ¸å¿ƒ<strong>HSMS</strong></div>
+              <div class="kpi">å…¬ç½‘å…¥å£<strong>Nginx</strong></div>
             </div>
             <div class="layout">
               <div class="flow">
-                <div class="flow-item">浏览器只接收 JSON 结构化数据，不直接处理 SECS-II Item 或 HSMS 数据帧。</div>
-                <div class="flow-item">REST 负责设备配置、连接控制、历史记录；WebSocket 负责状态变化、报文、报警实时推送。</div>
-                <div class="flow-item">C++ Host 服务维护设备会话、协议状态机、事件缓存和消息落库。</div>
-                <div class="flow-item">Nginx 对外统一暴露静态页面和后端接口。</div>
+                <div class="flow-item">æµè§ˆå™¨åªæŽ¥æ”¶ JSON ç»“æž„åŒ–æ•°æ®ï¼Œä¸ç›´æŽ¥å¤„ç† SECS-II Item æˆ– HSMS æ•°æ®å¸§ã€‚</div>
+                <div class="flow-item">REST è´Ÿè´£è®¾å¤‡é…ç½®ã€è¿žæŽ¥æŽ§åˆ¶ã€åŽ†å²è®°å½•ï¼›WebSocket è´Ÿè´£çŠ¶æ€å˜åŒ–ã€æŠ¥æ–‡ã€æŠ¥è­¦å®žæ—¶æŽ¨é€ã€‚</div>
+                <div class="flow-item">C++ Host æœåŠ¡ç»´æŠ¤è®¾å¤‡ä¼šè¯ã€åè®®çŠ¶æ€æœºã€äº‹ä»¶ç¼“å­˜å’Œæ¶ˆæ¯è½åº“ã€‚</div>
+                <div class="flow-item">Nginx å¯¹å¤–ç»Ÿä¸€æš´éœ²é™æ€é¡µé¢å’ŒåŽç«¯æŽ¥å£ã€‚</div>
               </div>
               <div class="code">Browser
   -> Nginx
@@ -229,20 +233,20 @@ C++ Host Service
         </section>
         <section class="panel">
           <div class="panel-header">
-            <h3>最小实现步骤</h3>
-            <span class="meta">从 mock 到真实协议</span>
+            <h3>æœ€å°å®žçŽ°æ­¥éª¤</h3>
+            <span class="meta">ä»Ž mock åˆ°çœŸå®žåè®®</span>
           </div>
           <div class="panel-body">
             <table class="table">
               <thead>
-                <tr><th>阶段</th><th>目标</th><th>产物</th></tr>
+                <tr><th>é˜¶æ®µ</th><th>ç›®æ ‡</th><th>äº§ç‰©</th></tr>
               </thead>
               <tbody>
-                <tr><td>Step 1</td><td>搭建前端页面与组件骨架</td><td>Vue 页面、设备面板、消息表</td></tr>
-                <tr><td>Step 2</td><td>建立 API 和 WebSocket 客户端层</td><td>api.ts、ws.ts、mock 推送</td></tr>
-                <tr><td>Step 3</td><td>补 C++ 后端基础接口</td><td>/api/devices、/api/connect</td></tr>
-                <tr><td>Step 4</td><td>接入 HostSession 与报文推送</td><td>实时状态、通信日志</td></tr>
-                <tr><td>Step 5</td><td>逐步补全 S1F13/S1F14 等基础流程</td><td>最小联调闭环</td></tr>
+                <tr><td>Step 1</td><td>æ­å»ºå‰ç«¯é¡µé¢ä¸Žç»„ä»¶éª¨æž¶</td><td>Vue é¡µé¢ã€è®¾å¤‡é¢æ¿ã€æ¶ˆæ¯è¡¨</td></tr>
+                <tr><td>Step 2</td><td>å»ºç«‹ API å’Œ WebSocket å®¢æˆ·ç«¯å±‚</td><td>api.tsã€ws.tsã€mock æŽ¨é€</td></tr>
+                <tr><td>Step 3</td><td>è¡¥ C++ åŽç«¯åŸºç¡€æŽ¥å£</td><td>/api/devicesã€/api/connect</td></tr>
+                <tr><td>Step 4</td><td>æŽ¥å…¥ HostSession ä¸ŽæŠ¥æ–‡æŽ¨é€</td><td>å®žæ—¶çŠ¶æ€ã€é€šä¿¡æ—¥å¿—</td></tr>
+                <tr><td>Step 5</td><td>é€æ­¥è¡¥å…¨ S1F13/S1F14 ç­‰åŸºç¡€æµç¨‹</td><td>æœ€å°è”è°ƒé—­çŽ¯</td></tr>
               </tbody>
             </table>
           </div>
@@ -252,3 +256,4 @@ C++ Host Service
   </div>
 </body>
 </html>
+

@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Handoff</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f7f2ea, #efe4d6);
+      color: #1f2937;
+    }
+    .shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .hero, .panel {
+      border-radius: 24px;
+      border: 1px solid #e7d7bf;
+      background: rgba(255, 250, 242, 0.96);
+      box-shadow: 0 16px 34px rgba(82, 55, 20, 0.10);
+    }
+    .hero {
+      padding: 28px;
+      background: linear-gradient(135deg, #7c3f16, #5d2e12);
+      color: #fffdf8;
+    }
+    .hero h1 { margin: 0 0 10px; font-size: 32px; }
+    .hero p { margin: 0; line-height: 1.7; color: rgba(255, 253, 248, 0.88); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .panel { padding: 20px; }
+    .panel h2 { margin: 0 0 14px; font-size: 20px; }
+    .panel p, .panel li { line-height: 1.7; color: #4b5563; }
+    pre {
+      margin: 0;
+      padding: 16px;
+      border-radius: 16px;
+      background: #2b2119;
+      color: #f7f0e2;
+      overflow-x: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <h1>Session Handoff</h1>
+      <p>
+        This page packages the key working context of the SEC/GEM web host project so it can be carried to a new computer and resumed without rereading the original chat thread.
+      </p>
+    </section>
+    <div class="grid">
+      <section class="panel">
+        <h2>Branch</h2>
+        <pre>codex/secsgem-web-host-skeleton</pre>
+      </section>
+      <section class="panel">
+        <h2>Remote</h2>
+        <pre>git@github.com:Qing-King/SECSGEM-CodeX.git</pre>
+      </section>
+      <section class="panel">
+        <h2>Recent Commits</h2>
+        <pre>9723af9 Document startup commands and Node requirements
+f461a3b Make deploy script path-dynamic
+e130fbb Split cloud and WSL deployment docs
+26f3b2e Wire frontend to live API endpoints
+b760dfe Add quick links to design overview
+b9fe437 Fix nginx deployment and proxy config
+84a17b1 Add SEC/GEM web console and deployment skeleton</pre>
+      </section>
+      <section class="panel">
+        <h2>Current Scope</h2>
+        <ul>
+          <li>Vue 3 runtime console exists</li>
+          <li>C++ minimal backend exists</li>
+          <li>REST routes are wired end-to-end</li>
+          <li>Cloud and WSL docs are split</li>
+          <li>WebSocket is not real yet</li>
+        </ul>
+      </section>
+      <section class="panel">
+        <h2>WSL Commands</h2>
+        <pre>cd /mnt/c/Build/SECSGEM-CODEX/SECSGEM-CodeX/frontend
+nvm use 20
+npm install
+npm run dev -- --host 0.0.0.0
+
+cd /mnt/c/Build/SECSGEM-CODEX/SECSGEM-CodeX/backend
+cmake -S . -B build
+cmake --build build -j
+./build/secsgem_backend</pre>
+      </section>
+      <section class="panel">
+        <h2>Ubuntu Commands</h2>
+        <pre>cd /opt/secsgem-codex
+git pull
+chmod +x deploy-ubuntu.sh
+./deploy-ubuntu.sh
+sudo systemctl restart secsgem-backend
+sudo systemctl restart nginx</pre>
+      </section>
+      <section class="panel">
+        <h2>Docs</h2>
+        <pre>/docs/design-overview.html
+/docs/todo-board.html
+/docs/cloud-deploy.html
+/docs/wsl-dev.html
+/docs/session-handoff.html</pre>
+      </section>
+      <section class="panel">
+        <h2>Next Step</h2>
+        <pre>Replace MockWsClient with a real WebSocket client and add backend /ws/devices/{id}.</pre>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
+
